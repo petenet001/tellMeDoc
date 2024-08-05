@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "955161315301",
+    "project_id": "tellmedoc-49bca",
+    "storage_bucket": "tellmedoc-49bca.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:955161315301:android:a4e8706b5c7ff36d75910c",
+        "android_client_info": {
+          "package_name": "com.example.tell_me_doctor"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBqVgvWd2cjkJ-eGESzmqOrStmX_Ofpd2s"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
