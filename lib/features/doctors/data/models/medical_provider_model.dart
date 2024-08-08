@@ -1,4 +1,5 @@
-import 'package:tell_me_doctor/features/docai/domain/entities/medical_provider.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:tell_me_doctor/features/doctors/domain/entities/medical_provider.dart';
 
 class MedicalProviderModel extends MedicalProvider {
   const MedicalProviderModel({
@@ -11,21 +12,24 @@ class MedicalProviderModel extends MedicalProvider {
     required super.longitude,
     super.placeName,
     super.placeType,
+    super.rating
   });
 
-  factory MedicalProviderModel.fromJson(Map<String, dynamic> json) {
+  factory MedicalProviderModel.fromJson(String id, Map<String, dynamic> json) {
     return MedicalProviderModel(
-      id: json['id'],
-      name: json['name'],
-      specialty: json['specialty'],
-      phone: json['phone'],
-      address: json['address'],
-      latitude: json['latitude'],
-      longitude: json['longitude'],
-      placeName: json['placeName'],
-      placeType: json['placeType'],
+      id: id,
+      name: json['name'] ?? '',
+      specialty: json['specialty'] ?? '',
+      phone: json['phone'] ?? '',
+      address: json['address'] ?? '',
+      latitude: (json['latitude'] as num?)?.toDouble() ?? 0.0,
+      longitude: (json['longitude'] as num?)?.toDouble() ?? 0.0,
+      placeName: json['placeName'] ?? '',
+      placeType: json['placeType'] ?? '',
     );
   }
+
+
 
   Map<String, dynamic> toJson() {
     return {
@@ -38,6 +42,7 @@ class MedicalProviderModel extends MedicalProvider {
       'longitude': longitude,
       'placeName': placeName,
       'placeType': placeType,
+      'rating':rating
     };
   }
 
@@ -52,6 +57,7 @@ class MedicalProviderModel extends MedicalProvider {
       longitude: entity.longitude,
       placeName: entity.placeName,
       placeType: entity.placeType,
+      rating: entity.rating
     );
   }
 }

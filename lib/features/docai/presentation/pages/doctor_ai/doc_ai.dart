@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+import 'package:heroicons/heroicons.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:tell_me_doctor/features/docai/presentation/pages/riverpod/chat_notifier.dart';
 import 'package:tell_me_doctor/features/docai/presentation/widgets/chat_message_widget.dart';
@@ -8,24 +10,30 @@ class DocAiPage extends ConsumerStatefulWidget {
   const DocAiPage({super.key});
 
   @override
-  _ChatPageState createState() => _ChatPageState();
+  ConsumerState<DocAiPage> createState() => _ChatPageState();
 }
 
 class _ChatPageState extends ConsumerState<DocAiPage> {
   final TextEditingController _textController = TextEditingController();
   final ImagePicker _picker = ImagePicker();
+  final ScrollController _scrollController = ScrollController();
 
   @override
   Widget build(BuildContext context) {
     final messages = ref.watch(chatProvider);
+    WidgetsBinding.instance.addPostFrameCallback((_) => _scrollToBottom());
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Assistant Médical'),leading: const BackButton(),),
+      appBar: AppBar(
+        title: const Text('Assistant Médical'),
+        leading: BackButton(onPressed: () => context.go('/home')),
+      ),
       body: SafeArea(
         child: Column(
           children: [
             Expanded(
               child: ListView.builder(
+                controller: _scrollController,
                 itemCount: messages.length,
                 itemBuilder: (context, index) {
                   return ChatMessageWidget(message: messages[index]);
@@ -37,19 +45,28 @@ class _ChatPageState extends ConsumerState<DocAiPage> {
               child: Row(
                 children: [
                   IconButton(
-                    icon: const Icon(Icons.image),
+                    icon: const HeroIcon(HeroIcons.photo),
                     onPressed: _pickImage,
                   ),
                   Expanded(
-                    child: TextField(
-                      controller: _textController,
-                      decoration: const InputDecoration(
-                        hintText: 'Posez une question médicale...',
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(50),
+                        color: Colors.purpleAccent.withOpacity(.2),
+                      ),
+                      child: TextField(
+                        controller: _textController,
+                        decoration: const InputDecoration(
+                          hintText: 'Dites moi ce qui ne va pas...',
+                          border: InputBorder.none,
+                        ),
+                        onSubmitted: (_) => _sendMessage(),
                       ),
                     ),
                   ),
                   IconButton(
-                    icon: const Icon(Icons.send),
+                    icon: const HeroIcon(HeroIcons.paperAirplane),
                     onPressed: _sendMessage,
                   ),
                 ],
@@ -80,25 +97,46 @@ class _ChatPageState extends ConsumerState<DocAiPage> {
   }
 
   Future<String?> _getImageDescription() async {
+    final descriptionController = TextEditingController();
     return await showDialog<String>(
       context: context,
       builder: (context) => AlertDialog(
         title: const Text("Décrivez l'image"),
         content: TextField(
-        decoration: const InputDecoration(hintText: "Entrez une brève description de l'image"),
-        onSubmitted: (value) => Navigator.of(context).pop(value),
+          controller: descriptionController,
+          decoration: const InputDecoration(hintText: "Entrez une brève description de l'image"),
+          onSubmitted: (value) => Navigator.of(context).pop(value),
+        ),
+        actions: [
+          TextButton(
+            child: const Text('Annuler'),
+            onPressed: () => Navigator.of(context).pop(),
+          ),
+          TextButton(
+            child: const Text('Envoyer'),
+            onPressed: () => Navigator.of(context).pop(descriptionController.text),
+          ),
+        ],
       ),
-      actions: [
-        TextButton(
-          child: const Text('Annuler'),
-          onPressed: () => Navigator.of(context).pop(),
-        ),
-        TextButton(
-          child: const Text('Envoyer'),
-          onPressed: () => Navigator.of(context).pop(_textController.text),
-        ),
-      ],
-    ),
     );
+  }
+
+  void _scrollToBottom() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (_scrollController.hasClients) {
+        _scrollController.animateTo(
+          _scrollController.position.maxScrollExtent,
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.easeOut,
+        );
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    _textController.dispose();
+    super.dispose();
   }
 }

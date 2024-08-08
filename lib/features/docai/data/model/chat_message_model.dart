@@ -1,5 +1,5 @@
 import '../../domain/entities/chat_message.dart';
-import 'medical_provider_model.dart';
+import '../../../doctors/data/models/medical_provider_model.dart';
 
 class ChatMessageModel extends ChatMessage {
   const ChatMessageModel({
@@ -26,7 +26,13 @@ class ChatMessageModel extends ChatMessage {
       type: MessageType.values[json['type'] as int],
       contentType: ContentType.values[json['contentType'] as int],
       recommendations: (json['recommendations'] as List<dynamic>?)
-          ?.map((e) => MedicalProviderModel.fromJson(e as Map<String, dynamic>))
+          ?.map((e) {
+        // Ici, nous devons extraire l'ID et les données séparément
+        final id = e['id'] as String;
+        final data = Map<String, dynamic>.from(e);
+        data.remove('id'); // Retirez l'ID des données car il sera passé séparément
+        return MedicalProviderModel.fromJson(id, data);
+      })
           .toList(),
       imageData: (json['imageData'] as List<dynamic>?)?.cast<int>(),
     );

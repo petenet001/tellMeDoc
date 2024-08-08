@@ -1,5 +1,5 @@
 import 'package:equatable/equatable.dart';
-import 'medical_provider.dart';
+import '../../../doctors/domain/entities/medical_provider.dart';
 
 enum MessageType { user, ai }
 enum ContentType { text, image }

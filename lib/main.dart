@@ -25,14 +25,6 @@ void main() async {
     exit(1);
   }
 
-  // The Gemini 1.5 models are versatile and work with most use cases petenet001@gmail.com
-  final model = GenerativeModel(model: 'gemini-1.5-flash', apiKey: apiKey);
-  final content = [Content.text('Write a story about Congo brazzaville')];
-  final response = await model.generateContent(content);
-  if (kDebugMode) {
-    print(response.text);
-  }
-
 
   runApp(const ProviderScope(child: MyApp()));
 }

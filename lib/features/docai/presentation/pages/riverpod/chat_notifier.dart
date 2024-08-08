@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:tell_me_doctor/core/usecase/usecase.dart';
@@ -24,40 +25,69 @@ class ChatNotifier extends Notifier<List<ChatMessage>> {
     _getChatMessages = GetChatMessages(repository);
     _sendTextMessage = SendTextMessage(repository);
     _sendImageMessage = SendImageMessage(repository);
-    _loadMessages();
+    _initializeMessages();
     return [];
   }
 
-  Future<void> _loadMessages() async {
-    state = await _getChatMessages(const NoParams());
+  Future<void> _initializeMessages() async {
+    try {
+      final messages = await _getChatMessages(const NoParams());
+      state = messages;
+    } catch (e) {
+      _handleError(e, 'Failed to load chat messages.');
+    }
   }
 
   Future<void> sendTextMessage(String content) async {
     try {
-      final message = await _sendTextMessage(content);
-      state = [...state, message];
+      final userMessage = ChatMessage(
+        content: content,
+        type: MessageType.user,
+        contentType: ContentType.text,
+      );
+
+      // Ajouter le message de l'utilisateur à la liste d'état
+      state = [...state, userMessage];
+
+      final aiMessage = await _sendTextMessage(content);
+
+      // Ajouter la réponse de l'IA à la liste d'état
+      state = [...state, aiMessage];
     } catch (e) {
-      // Handle error
+      _handleError(e, 'Failed to send text message.');
     }
   }
+
 
   Future<void> sendImageMessage(Uint8List imageData, String description) async {
     try {
       final message = await _sendImageMessage(ImageMessageParams(imageData: imageData, description: description));
       state = [...state, message];
     } catch (e) {
-      // Handle error
+      _handleError(e, 'Failed to send image message.');
     }
+  }
+
+  void _handleError(Object error, String message) {
+    print('Error: $message');
+    print('Details: $error');
   }
 }
 
 final chatRepositoryProvider = Provider((ref) {
-  final remoteDataSource = GeminiRemoteDataSourceImpl(ref.read(apiKeyProvider));
+  final remoteDataSource = GeminiRemoteDataSourceImpl(ref.read(apiKeyProvider), ref.read(firestoreProvider));
   return ChatRepositoryImpl(remoteDataSource);
 });
 
 final apiKeyProvider = Provider<String>((ref) {
-  final apiKey = dotenv.get('API_KEY');
+  const apiKeyKey = 'API_KEY';
+  final apiKey = dotenv.get(apiKeyKey, fallback: '');
+  if (apiKey.isEmpty) {
+    throw Exception('API Key not found in environment variables: $apiKeyKey');
+  }
   return apiKey;
 });
 
+final firestoreProvider = Provider<FirebaseFirestore>((ref) {
+  return FirebaseFirestore.instance;
+});

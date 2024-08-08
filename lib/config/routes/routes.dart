@@ -2,10 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:tell_me_doctor/features/auth/presentation/pages/auth/auth.dart';
 import 'package:tell_me_doctor/features/auth/presentation/pages/profile/profile.dart';
-import 'package:tell_me_doctor/features/docai/presentation/pages/home/doc_ai.dart';
+import 'package:tell_me_doctor/features/docai/presentation/pages/doctor_ai/doc_ai.dart';
+import 'package:tell_me_doctor/features/doctors/domain/entities/medical_provider.dart';
+import 'package:tell_me_doctor/features/doctors/presentation/doctor_category_details/doctor_category_details_page.dart';
+import 'package:tell_me_doctor/features/home/presentation/pages/all_doctor_categories/all_doctor_categories.dart';
+import 'package:tell_me_doctor/features/home/presentation/pages/doctor_profile/doctor_profile_page.dart';
 import 'package:tell_me_doctor/features/home/presentation/pages/home/home.dart';
 import 'package:tell_me_doctor/features/onBoarding/presentation/on_boarding.dart';
-import 'package:tell_me_doctor/features/auth/presentation/pages/login/login.dart'; // Ajoutez cet import
+import 'package:tell_me_doctor/features/auth/presentation/pages/login/login.dart';
 
 final GoRouter router = GoRouter(
     routes: <RouteBase>[
@@ -60,13 +64,12 @@ final GoRouter router = GoRouter(
           );
         },
       ),
-      // Ajoutez une route pour la page de login
       GoRoute(
         path: '/login',
         pageBuilder: (BuildContext context, GoRouterState state) {
           return CustomTransitionPage(
             key: state.pageKey,
-            child: LoginPage(),
+            child: const LoginPage(),
             transitionsBuilder: (context, animation, secondaryAnimation, child) {
               return FadeTransition(
                 opacity: CurveTween(curve: Curves.easeInOutCirc).animate(animation),
@@ -85,6 +88,53 @@ final GoRouter router = GoRouter(
             transitionsBuilder: (context, animation, secondaryAnimation, child) {
               return FadeTransition(
                 opacity: CurveTween(curve: Curves.easeInOutCirc).animate(animation),
+                child: child,
+              );
+            },
+          );
+        },
+      ),
+      GoRoute(
+        path: '/doc_profile/:id',
+        pageBuilder: (BuildContext context, GoRouterState state) {
+          final doctor = state.extra as MedicalProvider;
+          return CustomTransitionPage(
+            key: state.pageKey,
+            child: DoctorProfilePage(doctor: doctor),
+            transitionsBuilder: (context, animation, secondaryAnimation, child) {
+              return FadeTransition(
+                opacity: CurveTween(curve: Curves.easeInOutCirc).animate(animation),
+                child: child,
+              );
+            },
+          );
+        },
+      ),
+      GoRoute(
+        path: '/doctors/:category',
+        pageBuilder: (BuildContext context, GoRouterState state) {
+          final category = state.pathParameters['category']!;
+          return CustomTransitionPage(
+            key: state.pageKey,
+            child: DoctorCategoryDetailsPage(category: category),
+            transitionsBuilder: (context, animation, secondaryAnimation, child) {
+              return FadeTransition(
+                opacity: CurveTween(curve: Curves.easeInOutCirc).animate(animation),
+                child: child,
+              );
+            },
+          );
+        },
+      ),
+      GoRoute(
+        path: '/all-categories',
+        pageBuilder: (BuildContext context, GoRouterState state) {
+          return CustomTransitionPage(
+            key: state.pageKey,
+            child:  const AllDoctorCategoriesPage(),
+            transitionsBuilder: (context, animation, secondaryAnimation, child) {
+              return FadeTransition(
+                opacity: CurveTween(curve: Curves.bounceInOut).animate(animation),
                 child: child,
               );
             },
