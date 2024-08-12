@@ -43,11 +43,11 @@ class AboutPage extends StatelessWidget {
             ),
             const SizedBox(height: 8),
             const Text(
-              '- Nom du Développeur 1',
+              'Pierre MFOUNDOU',
               style: TextStyle(fontSize: 16),
             ),
             const Text(
-              '- Nom du Développeur 2',
+              'petenet001@gmail.com',
               style: TextStyle(fontSize: 16),
             ),
             const SizedBox(height: 16),

@@ -10,9 +10,9 @@ import 'package:tell_me_doctor/features/docai/domain/usecases/send_image_message
 import 'package:tell_me_doctor/features/docai/domain/usecases/send_text_message.dart';
 import 'dart:typed_data';
 
-final chatProvider = NotifierProvider<ChatNotifier, List<ChatMessage>>(() {
-  return ChatNotifier();
-});
+final chatProvider = NotifierProvider<ChatNotifier, List<ChatMessage>>(
+      () => ChatNotifier(),
+);
 
 class ChatNotifier extends Notifier<List<ChatMessage>> {
   late final GetChatMessages _getChatMessages;
@@ -46,22 +46,23 @@ class ChatNotifier extends Notifier<List<ChatMessage>> {
         contentType: ContentType.text,
       );
 
-      // Ajouter le message de l'utilisateur à la liste d'état
+      // Add user message to state
       state = [...state, userMessage];
 
       final aiMessage = await _sendTextMessage(content);
 
-      // Ajouter la réponse de l'IA à la liste d'état
+      // Add AI message to state
       state = [...state, aiMessage];
     } catch (e) {
       _handleError(e, 'Failed to send text message.');
     }
   }
 
-
   Future<void> sendImageMessage(Uint8List imageData, String description) async {
     try {
-      final message = await _sendImageMessage(ImageMessageParams(imageData: imageData, description: description));
+      final message = await _sendImageMessage(
+        ImageMessageParams(imageData: imageData, description: description),
+      );
       state = [...state, message];
     } catch (e) {
       _handleError(e, 'Failed to send image message.');
@@ -74,8 +75,11 @@ class ChatNotifier extends Notifier<List<ChatMessage>> {
   }
 }
 
-final chatRepositoryProvider = Provider((ref) {
-  final remoteDataSource = GeminiRemoteDataSourceImpl(ref.read(apiKeyProvider), ref.read(firestoreProvider));
+final chatRepositoryProvider = Provider<ChatRepositoryImpl>((ref) {
+  final remoteDataSource = GeminiRemoteDataSourceImpl(
+    ref.read(apiKeyProvider),
+    ref.read(firestoreProvider),
+  );
   return ChatRepositoryImpl(remoteDataSource);
 });
 

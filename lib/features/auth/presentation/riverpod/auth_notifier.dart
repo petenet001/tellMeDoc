@@ -184,6 +184,8 @@ class AuthNotifier extends Notifier<AuthState> {
         return;
       }
 
+
+
       final googleAuth = await googleUser.authentication;
       final credential = firebase_auth.GoogleAuthProvider.credential(
         accessToken: googleAuth.accessToken,
