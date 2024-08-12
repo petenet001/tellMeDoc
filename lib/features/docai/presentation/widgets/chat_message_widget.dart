@@ -5,12 +5,26 @@ import 'package:tell_me_doctor/features/docai/presentation/widgets/recommandatio
 
 class ChatMessageWidget extends StatelessWidget {
   final ChatMessage message;
+  final bool isLoading;
 
-  const ChatMessageWidget({super.key, required this.message});
+  const ChatMessageWidget({
+    super.key,
+    required this.message,
+    this.isLoading = false, // Ajout d'un paramètre isLoading
+  });
 
   @override
   Widget build(BuildContext context) {
-    print('Building ChatMessageWidget for: ${message.content}');
+    if (isLoading) {
+      return Center(
+        child: Image.asset(
+          'assets/loading_image.png', // Remplacez par le chemin de votre image de chargement
+          width: 150, // Vous pouvez ajuster la taille de l'image ici
+          height: 150,
+        ),
+      );
+    }
+
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16.0),
       child: Column(

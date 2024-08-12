@@ -1,21 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 import 'package:tell_me_doctor/features/doctors/presentation/riverpod/doctor_providers.dart';
 import 'package:tell_me_doctor/features/doctors/presentation/widgets/doc_grid_tile.dart';
 import 'package:tell_me_doctor/features/doctors/presentation/widgets/hospital_list_tile.dart';
-import 'package:tell_me_doctor/features/doctors/data/models/health_center_model.dart';
 
-class DoctorCategoryDetailsPage extends ConsumerStatefulWidget {
-  final String category;
+class AllDoctorsPage extends ConsumerStatefulWidget {
+  final String city;
 
-  const DoctorCategoryDetailsPage({super.key, required this.category});
+  const AllDoctorsPage({super.key, required this.city});
 
   @override
-  DoctorCategoryDetailsPageState createState() => DoctorCategoryDetailsPageState();
+  AllDoctorsPageState createState() => AllDoctorsPageState();
 }
 
-class DoctorCategoryDetailsPageState extends ConsumerState<DoctorCategoryDetailsPage> with SingleTickerProviderStateMixin {
+class AllDoctorsPageState extends ConsumerState<AllDoctorsPage> with SingleTickerProviderStateMixin {
   late TabController _tabController;
 
   @override
@@ -32,21 +30,16 @@ class DoctorCategoryDetailsPageState extends ConsumerState<DoctorCategoryDetails
 
   @override
   Widget build(BuildContext context) {
-    final doctorsAsyncValue = ref.watch(doctorsBySpecialtyProvider(widget.category));
-    final hospitalsAsyncValue = ref.watch(hospitalsBySpecialtyProvider(widget.category));
+    final doctorsAsyncValue = ref.watch(doctorsByCityProvider(widget.city));
+    final hospitalsAsyncValue = ref.watch(hospitalsByCityProvider(widget.city));
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('${widget.category} Specialists'),
-        leading: BackButton(
-          onPressed: (){
-            context.go('/home');
-          },
-        ),
+        title: Text('${widget.city} All Doctors'),
         bottom: TabBar(
           controller: _tabController,
           tabs: const [
-            Tab(text: 'Doctors'),
+            Tab(text: 'All Doctors'),
             Tab(text: 'Hospitals/Clinics'),
           ],
         ),
@@ -73,16 +66,11 @@ class DoctorCategoryDetailsPageState extends ConsumerState<DoctorCategoryDetails
           ),
           hospitalsAsyncValue.when(
             data: (hospitals) {
-              // Vérifiez que vous traitez des objets de type HealthCenterModel
-              final structures = hospitals.where((hospital) => hospital is HealthCenterModel).toList();
-              return structures.isNotEmpty
+              return hospitals.isNotEmpty
                   ? ListView.builder(
-                itemCount: structures.length,
+                itemCount: hospitals.length,
                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                itemBuilder: (context, index) {
-                  final healthCenter = structures[index] as HealthCenterModel;
-                  return HospitalListTile(hospital: healthCenter);
-                },
+                itemBuilder: (context, index) => HospitalListTile(hospital: hospitals[index]),
               )
                   : const Center(child: Text('No hospitals or clinics available'));
             },

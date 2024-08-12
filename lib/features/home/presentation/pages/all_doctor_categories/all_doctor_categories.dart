@@ -13,7 +13,7 @@ class AllDoctorCategoriesPage extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('All Categories'),
+        title: const Text('Toutes les Catégories'),
       ),
       body: categoriesAsyncValue.when(
         data: (categories) {

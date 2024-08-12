@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:tell_me_doctor/features/doctors/domain/entities/medical_provider.dart';
+import 'package:tell_me_doctor/features/doctors/domain/entities/health_center.dart';
 
 class HospitalListTile extends StatelessWidget {
-  final MedicalProvider hospital;
+  final HealthCenter hospital;
 
   const HospitalListTile({super.key, required this.hospital});
 
@@ -30,8 +30,13 @@ class HospitalListTile extends StatelessWidget {
                 width: 100,
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(14),
-                  image: const DecorationImage(
-                    image: AssetImage('assets/doctor_background.png'), // Assurez-vous d'avoir cette image
+                  image: hospital.profileImageUrl != null
+                      ? DecorationImage(
+                    image: NetworkImage(hospital.profileImageUrl!),
+                    fit: BoxFit.cover,
+                  )
+                      : const DecorationImage(
+                    image: AssetImage('assets/healthcenter.png'),
                     fit: BoxFit.cover,
                   ),
                 ),
@@ -42,25 +47,41 @@ class HospitalListTile extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      hospital.placeName ?? 'Unknown',
-                      style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
+                      hospital.name ?? 'Unknown',
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 20,
+                      ),
                     ),
                     Text(
-                      hospital.placeType ?? 'Hospital',
-                      style: const TextStyle(fontWeight: FontWeight.w500, fontSize: 14),
+                      _getPlaceTypeText(hospital.specialties),
+                      style: const TextStyle(
+                        fontWeight: FontWeight.w500,
+                        fontSize: 14,
+                      ),
                     ),
                     Text(
-                      hospital.address,
-                      style: const TextStyle(fontWeight: FontWeight.w300, fontSize: 16),
+                      hospital.address ?? 'No Address',
+                      style: const TextStyle(
+                        fontWeight: FontWeight.w300,
+                        fontSize: 16,
+                      ),
                     ),
                   ],
                 ),
               ),
-             // const Icon(Icons.chevron_right, size: 30),
+              // const Icon(Icons.chevron_right, size: 30),
             ],
           ),
         ),
       ),
     );
+  }
+
+  String _getPlaceTypeText(List<String>? specialties) {
+    if (specialties == null || specialties.isEmpty) {
+      return 'General Hospital';
+    }
+    return specialties.join(', ');
   }
 }

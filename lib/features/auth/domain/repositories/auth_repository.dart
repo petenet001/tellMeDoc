@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:tell_me_doctor/features/auth/domain/entities/user.dart';
 
 abstract class AuthRepository {
@@ -7,4 +9,5 @@ abstract class AuthRepository {
   Future<void> signOut();
   Future<User?> getCurrentUser();
   Future<User> updateUserProfile(User user);
+  Future<String> uploadProfileImage(File image); // Nouvelle méthode
 }

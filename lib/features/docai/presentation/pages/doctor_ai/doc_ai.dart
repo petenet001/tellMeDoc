@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
+import 'package:flutter_svg/flutter_svg.dart'; // Importez la bibliothèque flutter_svg
 import 'package:heroicons/heroicons.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:tell_me_doctor/features/auth/presentation/riverpod/auth_providers.dart';
 import 'package:tell_me_doctor/features/docai/presentation/pages/riverpod/chat_notifier.dart';
 import 'package:tell_me_doctor/features/docai/presentation/widgets/chat_message_widget.dart';
 
@@ -22,23 +23,37 @@ class _ChatPageState extends ConsumerState<DocAiPage> {
   Widget build(BuildContext context) {
     final messages = ref.watch(chatProvider);
     WidgetsBinding.instance.addPostFrameCallback((_) => _scrollToBottom());
+    final authState = ref.watch(authNotifierProvider);
 
     return Scaffold(
       appBar: AppBar(
         title: const Text('Assistant Médical'),
-        leading: BackButton(onPressed: () => context.go('/home')),
       ),
       body: SafeArea(
         child: Column(
           children: [
             Expanded(
-              child: ListView.builder(
-                controller: _scrollController,
-                itemCount: messages.length,
-                itemBuilder: (context, index) {
-                  return ChatMessageWidget(message: messages[index]);
-                },
-              ),
+              child: messages.isEmpty
+                  ? Center(
+                      child: Container(
+                        width: 200,
+                        height: 200,
+                        padding: const EdgeInsets.all(40),
+                        decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(200),
+                            color: Colors.purple.withOpacity(.05)),
+                        child: SvgPicture.asset(
+                          'assets/undraw_doctor_kw-5-l.svg', // Remplacez par le chemin de votre SVG
+                        ),
+                      ),
+                    )
+                  : ListView.builder(
+                      controller: _scrollController,
+                      itemCount: messages.length,
+                      itemBuilder: (context, index) {
+                        return ChatMessageWidget(message: messages[index]);
+                      },
+                    ),
             ),
             Padding(
               padding: const EdgeInsets.all(8.0),
@@ -57,8 +72,9 @@ class _ChatPageState extends ConsumerState<DocAiPage> {
                       ),
                       child: TextField(
                         controller: _textController,
-                        decoration: const InputDecoration(
-                          hintText: 'Dites moi ce qui ne va pas...',
+                        decoration: InputDecoration(
+                          hintText:
+                              "Alors ${authState.user?.firstName?.toLowerCase() ?? "User"} dites-moi tout... ",
                           border: InputBorder.none,
                         ),
                         onSubmitted: (_) => _sendMessage(),
@@ -91,7 +107,9 @@ class _ChatPageState extends ConsumerState<DocAiPage> {
       final imageBytes = await image.readAsBytes();
       final description = await _getImageDescription();
       if (description != null) {
-        ref.read(chatProvider.notifier).sendImageMessage(imageBytes, description);
+        ref
+            .read(chatProvider.notifier)
+            .sendImageMessage(imageBytes, description);
       }
     }
   }
@@ -104,7 +122,8 @@ class _ChatPageState extends ConsumerState<DocAiPage> {
         title: const Text("Décrivez l'image"),
         content: TextField(
           controller: descriptionController,
-          decoration: const InputDecoration(hintText: "Entrez une brève description de l'image"),
+          decoration: const InputDecoration(
+              hintText: "Entrez une brève description de l'image"),
           onSubmitted: (value) => Navigator.of(context).pop(value),
         ),
         actions: [
@@ -114,7 +133,8 @@ class _ChatPageState extends ConsumerState<DocAiPage> {
           ),
           TextButton(
             child: const Text('Envoyer'),
-            onPressed: () => Navigator.of(context).pop(descriptionController.text),
+            onPressed: () =>
+                Navigator.of(context).pop(descriptionController.text),
           ),
         ],
       ),

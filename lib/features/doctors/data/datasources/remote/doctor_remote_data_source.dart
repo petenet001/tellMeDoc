@@ -3,6 +3,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:tell_me_doctor/features/doctors/data/models/doctor_category_model.dart';
 import 'package:tell_me_doctor/features/doctors/data/models/medical_provider_model.dart';
+import 'package:tell_me_doctor/features/doctors/data/models/health_center_model.dart';
+import 'package:tell_me_doctor/features/doctors/domain/entities/health_center.dart';
 
 class DoctorRemoteDataSource {
   final FirebaseFirestore firestore;
@@ -21,12 +23,13 @@ class DoctorRemoteDataSource {
 
   Future<List<MedicalProviderModel>> getTopDoctors() async {
     final querySnapshot = await firestore.collection('doctors').limit(3).get();
-    print('Top doctors: ${querySnapshot.docs.map((doc) => doc.data()).toList()}');
-    return querySnapshot.docs.map((doc) {
+    final doctors = await Future.wait(querySnapshot.docs.map((doc) async {
       final data = doc.data();
-      data['id'] = doc.id; // Add the document ID to the data
-      return MedicalProviderModel.fromJson(doc.id, data);
-    }).toList();
+      final healthCenter = await _getHealthCenterForDoctor(data['healthCenterId']);
+      return MedicalProviderModel.fromJson(doc.id, data, healthCenter);
+    }));
+
+    return doctors;
   }
 
   Future<List<DoctorCategoryModel>> getDoctorCategories() async {
@@ -41,7 +44,7 @@ class DoctorRemoteDataSource {
 
     return categoryCounts.entries
         .map((e) => DoctorCategoryModel(
-      id: e.key, // Using specialty as id for simplicity
+      id: e.key,
       specialty: e.key,
       count: e.value,
       color: _getRandomColor(),
@@ -53,38 +56,68 @@ class DoctorRemoteDataSource {
     final snapshot = await firestore.collection('doctors')
         .where('specialty', isEqualTo: specialty)
         .get();
-    print('Doctors by specialty ($specialty): ${snapshot.docs.map((doc) => doc.data()).toList()}');
+
+    final doctors = await Future.wait(snapshot.docs.map((doc) async {
+      final data = doc.data();
+      final healthCenter = await _getHealthCenterForDoctor(data['healthCenterId']);
+      return MedicalProviderModel.fromJson(doc.id, data, healthCenter);
+    }));
+
+    return doctors;
+  }
+
+  Future<List<HealthCenterModel>> getHospitalsBySpecialty(String specialty) async {
+    final snapshot = await firestore.collection('centers')
+        .where('specialties', arrayContains: specialty)
+        .get();
+
     return snapshot.docs.map((doc) {
       final data = doc.data();
-      data['id'] = doc.id; // Add the document ID to the data
-      return MedicalProviderModel.fromJson(data['id'], data);
+      return HealthCenterModel.fromJson(doc.id, data);
     }).toList();
   }
 
-  Future<List<MedicalProviderModel>> getHospitalsBySpecialty(String specialty) async {
-    final snapshot = await firestore.collection('doctors')
-        .where('specialty', isEqualTo: specialty)
-        .get();
+  Future<List<MedicalProviderModel>> getDoctorsByCity(String city) async {
+    final snapshot = await firestore.collection('doctors').get();
 
-    print('Structures by specialty ($specialty): ${snapshot.docs.map((doc) => doc.data()).toList()}'); // Log the results
-    return snapshot.docs.map((doc) {
-      final data = doc.data();
-      data['id'] = doc.id; // Add the document ID to the data
-      return MedicalProviderModel.fromJson(data['id'], data);
+    final filteredDocs = snapshot.docs.where((doc) {
+      final address = doc.data()['address'] as String;
+      return address.contains(city);
     }).toList();
+
+    final doctors = await Future.wait(filteredDocs.map((doc) async {
+      final data = doc.data();
+      final healthCenter = await _getHealthCenterForDoctor(data['healthCenterId']);
+      return MedicalProviderModel.fromJson(doc.id, data, healthCenter);
+    }));
+
+    return doctors;
   }
 
+  Future<List<HealthCenterModel>> getHospitalsByCity(String city) async {
+    final snapshot = await firestore.collection('centers').get();
 
-/*Future<List<MedicalProviderModel>> getHospitalsBySpecialty(String specialty) async {
-    final snapshot = await firestore.collection('doctors')
-        .where('specialty', isEqualTo: specialty)
-        .where('placeType', isEqualTo: 'Hospital')
-        .get();
-    print('Hospitals by specialty ($specialty): ${snapshot.docs.map((doc) => doc.data()).toList()}');
-    return snapshot.docs.map((doc) {
-      final data = doc.data();
-      data['id'] = doc.id; // Add the document ID to the data
-      return MedicalProviderModel.fromJson(data['id'], data);
+    final filteredDocs = snapshot.docs.where((doc) {
+      final address = doc.data()['address'] as String;
+      return address.contains(city);
     }).toList();
-  }*/
+
+    final hospitals = await Future.wait(filteredDocs.map((doc) async {
+      final data = doc.data();
+      return HealthCenterModel.fromJson(doc.id, data);
+    }));
+
+    return hospitals;
+  }
+
+  Future<HealthCenterModel?> _getHealthCenterForDoctor(String? healthCenterId) async {
+    if (healthCenterId == null) return null;
+
+    final healthCenterSnapshot = await firestore.collection('centers').doc(healthCenterId).get();
+    if (healthCenterSnapshot.exists) {
+      final data = healthCenterSnapshot.data();
+      return HealthCenterModel.fromJson(healthCenterSnapshot.id, data!);
+    }
+    return null;
+  }
 }

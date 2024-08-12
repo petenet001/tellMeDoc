@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:tell_me_doctor/features/auth/presentation/riverpod/auth_providers.dart';
 import 'package:tell_me_doctor/features/auth/presentation/pages/login/login.dart';
+import 'package:tell_me_doctor/features/auth/presentation/riverpod/auth_providers.dart';
 import 'package:tell_me_doctor/features/auth/presentation/riverpod/auth_state.dart';
 import 'package:tell_me_doctor/features/home/presentation/pages/home/home.dart';
 

@@ -13,7 +13,7 @@ class DoctorCategoriesSection extends ConsumerWidget {
     final categoriesAsyncValue = ref.watch(doctorCategoriesProvider);
 
     return SizedBox(
-      height: 300, // Ajustez cette hauteur selon vos besoins
+      height: 300,
       child: categoriesAsyncValue.when(
         data: (categories) {
           final displayedCategories = categories.take(3).toList();
@@ -28,7 +28,7 @@ class DoctorCategoriesSection extends ConsumerWidget {
                 return DoctorCategoryCard(
                   category: category,
                   onTap: () {
-                    context.go('/doctors/${category.specialty}');
+                    context.push('/doctors/${category.specialty}');
                   },
                 );
               } else {

@@ -1,13 +1,12 @@
 import 'package:tell_me_doctor/features/doctors/domain/entities/health_center.dart';
-import 'package:tell_me_doctor/features/doctors/domain/entities/medical_provider.dart';
 import 'package:tell_me_doctor/features/doctors/domain/repositories/doctor_repository.dart';
 
-class GetHospitalsBySpecialtyUseCase {
+class GetHealthCentersBySpecialtyUseCase {
   final DoctorRepository repository;
 
-  GetHospitalsBySpecialtyUseCase(this.repository);
+  GetHealthCentersBySpecialtyUseCase(this.repository);
 
   Future<List<HealthCenter>> call(String specialty) async {
-    return await repository.getHospitalsBySpecialty(specialty);
+    return await repository.getHospitalsBySpecialty(specialty); // Vous devrez peut-être modifier le repository pour retourner des `HealthCenter` au lieu de `MedicalProvider`.
   }
 }

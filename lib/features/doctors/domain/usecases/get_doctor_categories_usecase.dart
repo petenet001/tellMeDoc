@@ -1,5 +1,5 @@
-import '../entities/doctor_category.dart';
-import '../repositories/doctor_repository.dart';
+import 'package:tell_me_doctor/features/doctors/domain/entities/doctor_category.dart';
+import 'package:tell_me_doctor/features/doctors/domain/repositories/doctor_repository.dart';
 
 class GetDoctorCategoriesUsecase {
   final DoctorRepository repository;

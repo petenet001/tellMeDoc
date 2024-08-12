@@ -4,8 +4,11 @@ import 'package:tell_me_doctor/features/doctors/data/datasources/remote/doctor_r
 import 'package:tell_me_doctor/features/doctors/data/repositories/doctor_repository_impl.dart';
 import 'package:tell_me_doctor/features/doctors/domain/entities/doctor_category.dart';
 import 'package:tell_me_doctor/features/doctors/domain/entities/medical_provider.dart';
+import 'package:tell_me_doctor/features/doctors/domain/entities/health_center.dart';
 import 'package:tell_me_doctor/features/doctors/domain/usecases/get_doctor_categories_usecase.dart';
+import 'package:tell_me_doctor/features/doctors/domain/usecases/get_doctors_by_city_usecase.dart';
 import 'package:tell_me_doctor/features/doctors/domain/usecases/get_hospital_by_category_usecase.dart';
+import 'package:tell_me_doctor/features/doctors/domain/usecases/get_hospitals_by_city_usecase.dart';
 import 'package:tell_me_doctor/features/doctors/domain/usecases/get_top_doctor_usecase.dart';
 import 'package:tell_me_doctor/features/doctors/domain/usecases/get_doctors_by_specialty_usecase.dart';
 
@@ -43,7 +46,28 @@ final getHospitalsBySpecialtyProvider = Provider<GetHospitalsBySpecialtyUseCase>
   return GetHospitalsBySpecialtyUseCase(repository);
 });
 
-final hospitalsBySpecialtyProvider = FutureProvider.family<List<MedicalProvider>, String>((ref, specialty) async {
+// Correction: Returning a list of HealthCenter instead of MedicalProvider
+final hospitalsBySpecialtyProvider = FutureProvider.family<List<HealthCenter>, String>((ref, specialty) async {
   final useCase = ref.watch(getHospitalsBySpecialtyProvider);
   return useCase(specialty);
+});
+
+final getDoctorsByCityProvider = Provider((ref) {
+  final repository = ref.watch(doctorRepositoryProvider);
+  return GetDoctorsByCityUsecase(repository);
+});
+
+final doctorsByCityProvider = FutureProvider.family<List<MedicalProvider>, String>((ref, city) async {
+  final useCase = ref.watch(getDoctorsByCityProvider);
+  return useCase(city);
+});
+
+final getHospitalsByCityProvider = Provider<GetHospitalsByCityUseCase>((ref) {
+  final repository = ref.watch(doctorRepositoryProvider);
+  return GetHospitalsByCityUseCase(repository);
+});
+
+final hospitalsByCityProvider = FutureProvider.family<List<HealthCenter>, String>((ref, city) async {
+  final useCase = ref.watch(getHospitalsByCityProvider);
+  return useCase(city);
 });

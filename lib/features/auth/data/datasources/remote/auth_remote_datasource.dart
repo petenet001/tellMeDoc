@@ -1,119 +1,176 @@
+import 'dart:developer';
+
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:tell_me_doctor/core/error/exceptions.dart';
+import 'package:tell_me_doctor/features/auth/data/models/user_model.dart';
 import 'package:tell_me_doctor/features/auth/domain/entities/user.dart';
-import '../../../../../core/error/exceptions.dart';
-import '../../models/user_model.dart';
 
-abstract class AuthRemoteDataSource {
-  Future<UserModel> signInWithEmailAndPassword(String email, String password);
-  Future<UserModel> signUpWithEmailAndPassword(String email, String password);
-  Future<UserModel> signInWithGoogle();
-  Future<void> signOut();
-  Future<UserModel?> getCurrentUser();
-  Future<User> updateUserProfile(User user);
-}
-
-class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
+class AuthRemoteDataSource {
   final firebase_auth.FirebaseAuth _firebaseAuth;
   final GoogleSignIn _googleSignIn;
+  final FirebaseFirestore _firestore;
 
-  AuthRemoteDataSourceImpl({
+  AuthRemoteDataSource({
     required firebase_auth.FirebaseAuth firebaseAuth,
     required GoogleSignIn googleSignIn,
-  }) : _firebaseAuth = firebaseAuth, _googleSignIn = googleSignIn;
+    required FirebaseFirestore firestore,
+  })  : _firebaseAuth = firebaseAuth,
+        _googleSignIn = googleSignIn,
+        _firestore = firestore;
 
-  @override
   Future<UserModel> signInWithEmailAndPassword(String email, String password) async {
     try {
-      final userCredential = await _firebaseAuth.signInWithEmailAndPassword(
-        email: email,
-        password: password,
-      );
-      return UserModel.fromFirebaseUser(userCredential.user!);
+      log("Attempting to sign in with email: $email");
+      final userCredential = await _firebaseAuth.signInWithEmailAndPassword(email: email, password: password);
+      log("Firebase sign-in successful for user ID: ${userCredential.user?.uid}");
+      return _getOrCreateUser(userCredential.user!);
     } on firebase_auth.FirebaseAuthException catch (e) {
+      log("FirebaseAuthException during sign in: ${e.message}");
       throw AuthException(e.message ?? 'An error occurred during sign in');
+    } catch (e) {
+      log("Unexpected error during sign in: $e");
+      throw ServerException("Failed to sign in", e.toString());
     }
   }
 
-  @override
   Future<UserModel> signUpWithEmailAndPassword(String email, String password) async {
     try {
-      final userCredential = await _firebaseAuth.createUserWithEmailAndPassword(
-        email: email,
-        password: password,
-      );
-      return UserModel.fromFirebaseUser(userCredential.user!);
+      log("Attempting to sign up with email: $email");
+      final userCredential = await _firebaseAuth.createUserWithEmailAndPassword(email: email, password: password);
+      log("Firebase sign-up successful for user ID: ${userCredential.user?.uid}");
+      return _createUserProfile(userCredential.user!);
     } on firebase_auth.FirebaseAuthException catch (e) {
+      log("FirebaseAuthException during sign up: ${e.message}");
       throw AuthException(e.message ?? 'An error occurred during sign up');
+    } catch (e) {
+      log("Unexpected error during sign up: $e");
+      throw ServerException("Failed to sign up", e.toString());
     }
   }
 
-  @override
   Future<UserModel> signInWithGoogle() async {
     try {
-      final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
-      final GoogleSignInAuthentication? googleAuth = await googleUser?.authentication;
-
+      log("Attempting to sign in with Google");
+      final googleUser = await _googleSignIn.signIn();
+      final googleAuth = await googleUser?.authentication;
       final credential = firebase_auth.GoogleAuthProvider.credential(
         accessToken: googleAuth?.accessToken,
         idToken: googleAuth?.idToken,
       );
-
       final userCredential = await _firebaseAuth.signInWithCredential(credential);
-      return UserModel.fromFirebaseUser(userCredential.user!);
+      log("Google sign-in successful for user ID: ${userCredential.user?.uid}");
+      return _getOrCreateUser(userCredential.user!);
     } catch (e) {
+      log("Unexpected error during Google sign in: $e");
       throw AuthException('Failed to sign in with Google');
     }
   }
 
-  @override
   Future<void> signOut() async {
     try {
+      log("Signing out");
       await Future.wait([
         _firebaseAuth.signOut(),
         _googleSignIn.signOut(),
       ]);
     } catch (e) {
+      log("Unexpected error during sign out: $e");
       throw AuthException('Failed to sign out');
     }
   }
 
-  @override
   Future<UserModel?> getCurrentUser() async {
-    final user = _firebaseAuth.currentUser;
-    if (user != null) {
-      return UserModel.fromFirebaseUser(user);
+    try {
+      final user = _firebaseAuth.currentUser;
+      if (user != null) {
+        log("Fetching user profile from Firestore for user ID: ${user.uid}");
+        final snapshot = await _firestore.collection('users').doc(user.uid).get();
+        if (snapshot.exists) {
+          log("User profile found in Firestore: ${snapshot.data()}");
+          return UserModel.fromJson(snapshot.data()!);
+        } else {
+          log("No user profile found in Firestore for user ID: ${user.uid}");
+        }
+      } else {
+        log("No current user signed in with Firebase.");
+      }
+      return null;
+    } catch (e) {
+      log("Error while fetching current user: $e");
+      throw ServerException("Failed to get current user", e.toString());
     }
-    return null;
   }
 
-  @override
-  Future<User> updateUserProfile(User user) async {
+  Future<UserModel> updateUserProfile(User user) async {
     try {
-      await _firebaseAuth.currentUser?.updateDisplayName(user.name);
-      await _firebaseAuth.currentUser?.verifyBeforeUpdateEmail(user.email);
+      final firebaseUser = _firebaseAuth.currentUser;
 
-      // Récupérez l'utilisateur mis à jour
-      final updatedFirebaseUser = _firebaseAuth.currentUser;
-      if (updatedFirebaseUser != null) {
-        return User(
-          id: updatedFirebaseUser.uid,
-          email: updatedFirebaseUser.email!,
-          name: updatedFirebaseUser.displayName,
-        );
+      if (firebaseUser != null) {
+        log("Updating user profile for user ID: ${firebaseUser.uid}");
+        await firebaseUser.verifyBeforeUpdateEmail(user.email);
+        await firebaseUser.updateDisplayName("${user.firstName} ${user.name}");
+
+        final userRef = _firestore.collection('users').doc(firebaseUser.uid);
+        await userRef.update({
+          'firstName': user.firstName,
+          'lastName': user.name,
+          'phoneNumber': user.phone,
+          'city': user.city,
+          'photoUrl': user.photoUrl,
+          'updatedAt': FieldValue.serverTimestamp(),
+        });
+
+        final updatedSnapshot = await userRef.get();
+        log("User profile updated in Firestore: ${updatedSnapshot.data()}");
+        return UserModel.fromJson(updatedSnapshot.data()!);
       } else {
-        throw Exception('User not found after update');
+        log("No user signed in to update profile.");
+        throw Exception('No user is signed in');
       }
     } catch (e) {
+      log("Error during user profile update: $e");
       throw Exception('Failed to update user profile: $e');
+    }
+  }
+
+  Future<UserModel> _createUserProfile(firebase_auth.User firebaseUser) async {
+    final userRef = _firestore.collection('users').doc(firebaseUser.uid);
+    final newUser = UserModel(
+      id: firebaseUser.uid,
+      email: firebaseUser.email!,
+      firstName: firebaseUser.displayName?.split(' ').first,
+      name: firebaseUser.displayName?.split(' ').last,
+      photoUrl: firebaseUser.photoURL,
+      createdAt: DateTime.now(),
+      updatedAt: DateTime.now(),
+    );
+
+    log("Creating user profile in Firestore for user ID: ${firebaseUser.uid}");
+    await userRef.set(newUser.toJson());
+    return newUser;
+  }
+
+  Future<UserModel> _getOrCreateUser(firebase_auth.User firebaseUser) async {
+    final userRef = _firestore.collection('users').doc(firebaseUser.uid);
+    final snapshot = await userRef.get();
+
+    if (snapshot.exists) {
+      log("User profile already exists in Firestore for user ID: ${firebaseUser.uid}");
+      return UserModel.fromJson(snapshot.data()!);
+    } else {
+      log("User profile does not exist in Firestore, creating new profile for user ID: ${firebaseUser.uid}");
+      return _createUserProfile(firebaseUser);
     }
   }
 }
 
 final authRemoteDataSourceProvider = Provider<AuthRemoteDataSource>((ref) {
- firebase_auth.FirebaseAuth firebaseAuth = firebase_auth.FirebaseAuth.instance;
- GoogleSignIn googleSignIn = GoogleSignIn();
-  return AuthRemoteDataSourceImpl(firebaseAuth: firebaseAuth,googleSignIn: googleSignIn);
+  return AuthRemoteDataSource(
+    firebaseAuth: firebase_auth.FirebaseAuth.instance,
+    googleSignIn: GoogleSignIn(),
+    firestore: FirebaseFirestore.instance,
+  );
 });
-

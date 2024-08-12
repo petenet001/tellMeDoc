@@ -1,4 +1,4 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:tell_me_doctor/features/doctors/domain/entities/health_center.dart';
 import 'package:tell_me_doctor/features/doctors/domain/entities/medical_provider.dart';
 
 class MedicalProviderModel extends MedicalProvider {
@@ -10,12 +10,12 @@ class MedicalProviderModel extends MedicalProvider {
     required super.address,
     required super.latitude,
     required super.longitude,
-    super.placeName,
-    super.placeType,
-    super.rating
+    super.healthCenter,
+    super.rating,
+    super.profileImageUrl, // Ajout du champ pour l'URL de l'image de profil
   });
 
-  factory MedicalProviderModel.fromJson(String id, Map<String, dynamic> json) {
+  factory MedicalProviderModel.fromJson(String id, Map<String, dynamic> json, [HealthCenter? healthCenter]) {
     return MedicalProviderModel(
       id: id,
       name: json['name'] ?? '',
@@ -24,12 +24,11 @@ class MedicalProviderModel extends MedicalProvider {
       address: json['address'] ?? '',
       latitude: (json['latitude'] as num?)?.toDouble() ?? 0.0,
       longitude: (json['longitude'] as num?)?.toDouble() ?? 0.0,
-      placeName: json['placeName'] ?? '',
-      placeType: json['placeType'] ?? '',
+      healthCenter: healthCenter, // Référence optionnelle au centre de santé
+      rating: json['rating'] as int?,
+      profileImageUrl: json['profileImageUrl'], // Ajout du champ pour l'URL de l'image de profil
     );
   }
-
-
 
   Map<String, dynamic> toJson() {
     return {
@@ -40,9 +39,9 @@ class MedicalProviderModel extends MedicalProvider {
       'address': address,
       'latitude': latitude,
       'longitude': longitude,
-      'placeName': placeName,
-      'placeType': placeType,
-      'rating':rating
+      'healthCenterId': healthCenter?.id, // On stocke uniquement l'ID du centre de santé
+      'rating': rating,
+      'profileImageUrl': profileImageUrl, // Ajout de l'URL de l'image dans la méthode toJson
     };
   }
 
@@ -55,9 +54,9 @@ class MedicalProviderModel extends MedicalProvider {
       address: entity.address,
       latitude: entity.latitude,
       longitude: entity.longitude,
-      placeName: entity.placeName,
-      placeType: entity.placeType,
-      rating: entity.rating
+      healthCenter: entity.healthCenter,
+      rating: entity.rating,
+      profileImageUrl: entity.profileImageUrl, // Ajout du champ pour l'URL de l'image de profil
     );
   }
 }

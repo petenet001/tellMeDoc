@@ -5,25 +5,24 @@ import 'package:go_router/go_router.dart';
 import 'package:tell_me_doctor/features/auth/presentation/riverpod/auth_providers.dart';
 import 'package:tell_me_doctor/features/auth/presentation/riverpod/auth_state.dart';
 
-class LoginPage extends ConsumerStatefulWidget {
-  const LoginPage({super.key});
+class RegisterPage extends ConsumerStatefulWidget {
+  const RegisterPage({super.key});
 
   @override
-  ConsumerState<LoginPage> createState() => _LoginPageState();
+  ConsumerState<RegisterPage> createState() => _RegisterPageState();
 }
 
-class _LoginPageState extends ConsumerState<LoginPage> {
+class _RegisterPageState extends ConsumerState<RegisterPage> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
+  final TextEditingController _confirmPasswordController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
-
-  bool _isLoadingEmail = false; // Ajout d'une variable pour le bouton de connexion par email
-  bool _isLoadingGoogle = false; // Ajout d'une variable pour le bouton de connexion par Google
 
   @override
   void dispose() {
     _emailController.dispose();
     _passwordController.dispose();
+    _confirmPasswordController.dispose();
     super.dispose();
   }
 
@@ -33,10 +32,12 @@ class _LoginPageState extends ConsumerState<LoginPage> {
       if (state.user != null) {
         context.go('/home');
       } else if (state.errorMessage != null) {
-        log("les logs d'authentification : ${state.errorMessage!}");
+        log("les logs d'enregistrement : ${state.errorMessage!}");
         _showSnackBar(context, state.errorMessage!, Colors.red);
       }
     });
+
+    final isLoading = ref.watch(authNotifierProvider).isLoading;
 
     return Scaffold(
       body: Stack(
@@ -73,7 +74,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                               ),
                               const SizedBox(height: 20),
                               const Text(
-                                "Login",
+                                "Register",
                                 style: TextStyle(
                                   fontSize: 32,
                                   color: Colors.purple,
@@ -82,7 +83,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                               ),
                               const SizedBox(height: 10),
                               const Text(
-                                "Login to continue using the app",
+                                "Create an account to continue",
                                 style: TextStyle(fontSize: 16),
                               ),
                               const SizedBox(height: 20),
@@ -108,38 +109,31 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                                   return null;
                                 },
                               ),
-                              const SizedBox(height: 10),
-                              Align(
-                                alignment: Alignment.centerRight,
-                                child: TextButton(
-                                  onPressed: () {
-                                    // Handle forgot password
-                                  },
-                                  child: const Text(
-                                    "Forgot Password?",
-                                    style: TextStyle(color: Colors.purple),
-                                  ),
-                                ),
+                              const SizedBox(height: 20),
+                              _buildTextField(
+                                controller: _confirmPasswordController,
+                                labelText: "Confirm Password",
+                                obscureText: true,
+                                validator: (value) {
+                                  if (value == null || value.isEmpty) {
+                                    return 'Please confirm your password';
+                                  }
+                                  if (value != _passwordController.text) {
+                                    return 'Passwords do not match';
+                                  }
+                                  return null;
+                                },
                               ),
                               const SizedBox(height: 20),
                               SizedBox(
                                 width: double.infinity,
                                 child: ElevatedButton(
-                                  onPressed: _isLoadingEmail ? null : () {
+                                  onPressed: isLoading ? null : () {
                                     if (_formKey.currentState!.validate()) {
-                                      setState(() {
-                                        _isLoadingEmail = true;
-                                      });
-                                      ref.read(authNotifierProvider.notifier).signInWithEmailAndPassword(
+                                      ref.read(authNotifierProvider.notifier).signUpWithEmailAndPassword(
                                         _emailController.text,
                                         _passwordController.text,
-                                      ).whenComplete(() {
-                                        if (mounted) {
-                                          setState(() {
-                                            _isLoadingEmail = false;
-                                          });
-                                        }
-                                      });
+                                      );
                                     }
                                   },
                                   style: ElevatedButton.styleFrom(
@@ -147,12 +141,12 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                                     padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 15),
                                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                                   ),
-                                  child: _isLoadingEmail
+                                  child: isLoading
                                       ? const CircularProgressIndicator(
                                     color: Colors.white,
                                   )
                                       : const Text(
-                                    "Connexion",
+                                    "Register",
                                     style: TextStyle(
                                       fontSize: 18,
                                       color: Colors.white,
@@ -162,63 +156,17 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                                 ),
                               ),
                               const SizedBox(height: 20),
-                              const Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Text("Or Login with", style: TextStyle(fontWeight: FontWeight.w800)),
-                                ],
-                              ),
-                              const SizedBox(height: 20),
-                              SizedBox(
-                                width: double.infinity,
-                                child: ElevatedButton(
-                                  onPressed: _isLoadingGoogle
-                                      ? null
-                                      : () {
-                                    setState(() {
-                                      _isLoadingGoogle = true;
-                                    });
-                                    ref.read(authNotifierProvider.notifier).signInWithGoogle().whenComplete(() {
-                                      if (mounted) {
-                                        setState(() {
-                                          _isLoadingGoogle = false;
-                                        });
-                                      }
-                                    });
-                                  },
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: Colors.white,
-                                    padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 15),
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(10),
-                                      side: const BorderSide(
-                                        width: 1,
-                                        color: Colors.purple,
-                                        style: BorderStyle.solid,
-                                      ),
-                                    ),
-                                  ),
-                                  child: _isLoadingGoogle
-                                      ? const CircularProgressIndicator()
-                                      : Image.asset(
-                                    "assets/google-logo-carre-2015-09-400.png",
-                                    width: 25,
-                                    height: 25,
-                                  ),
-                                ),
-                              ),
-                              const SizedBox(height: 20),
                               Row(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
-                                  const Text("Don't have an account?"),
+                                  const Text("Already have an account?"),
                                   TextButton(
-                                    onPressed: _isLoadingEmail || _isLoadingGoogle
+                                    onPressed: isLoading
                                         ? null
                                         : () {
-                                      context.go('/register');
+                                      context.go('/login');
                                     },
-                                    child: const Text("Register", style: TextStyle(color: Colors.purple)),
+                                    child: const Text("Login", style: TextStyle(color: Colors.purple)),
                                   ),
                                 ],
                               ),
