@@ -20,15 +20,15 @@ class GeminiRemoteDataSourceImpl implements GeminiRemoteDataSource {
 
   GeminiRemoteDataSourceImpl(String apiKey, this._firestore)
       : _model = GenerativeModel(
-    model: 'gemini-1.5-flash',
-    apiKey: apiKey,
-    generationConfig: GenerationConfig(
-      temperature: 0.7,
-      topK: 40,
-      topP: 0.95,
-      maxOutputTokens: 1024,
-    ),
-  );
+          model: 'gemini-1.5-flash',
+          apiKey: apiKey,
+          generationConfig: GenerationConfig(
+            temperature: 0.7,
+            topK: 40,
+            topP: 0.95,
+            maxOutputTokens: 1024,
+          ),
+        );
 
   /// Génère une réponse textuelle basée sur un prompt et un historique de conversation.
   @override
@@ -60,7 +60,8 @@ class GeminiRemoteDataSourceImpl implements GeminiRemoteDataSource {
       String finalResponse = responseText;
       if (doctors.isNotEmpty) {
         finalResponse += "\n\n${_getRecommendationIntro(language)}";
-        finalResponse += "\n${_formatProviderRecommendations(doctors, language)}";
+        finalResponse +=
+            "\n${_formatProviderRecommendations(doctors, language)}";
       }
 
       return ChatMessage(
@@ -112,7 +113,7 @@ class GeminiRemoteDataSourceImpl implements GeminiRemoteDataSource {
   /// Détecte la langue d'une entrée textuelle (anglais ou français).
   String _detectLanguage(String text) {
     final isFrench =
-    RegExp(r'^\p{Script=Latin}+$', unicode: true).hasMatch(text);
+        RegExp(r'^\p{Script=Latin}+$', unicode: true).hasMatch(text);
     return isFrench ? 'fr' : 'en';
   }
 
@@ -126,7 +127,7 @@ class GeminiRemoteDataSourceImpl implements GeminiRemoteDataSource {
     final conversationHistory = history
         .take(5)
         .map((msg) =>
-    "${msg.type == MessageType.user ? 'User' : 'Assistant'}: ${msg.content}")
+            "${msg.type == MessageType.user ? 'User' : 'Assistant'}: ${msg.content}")
         .join("\n");
 
     final exampleConversations = language == 'fr'
@@ -270,7 +271,8 @@ class GeminiRemoteDataSourceImpl implements GeminiRemoteDataSource {
               address: healthCenterData['address'] ?? '',
               latitude: healthCenterData['latitude'] ?? 0.0,
               longitude: healthCenterData['longitude'] ?? 0.0,
-              specialties: List<String>.from(healthCenterData['specialties'] ?? []),
+              specialties:
+                  List<String>.from(healthCenterData['specialties'] ?? []),
             );
           }
         }

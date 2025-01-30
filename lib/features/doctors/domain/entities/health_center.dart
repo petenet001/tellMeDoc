@@ -20,5 +20,6 @@ class HealthCenter extends Equatable {
   });
 
   @override
-  List<Object?> get props => [id, name, address, latitude, longitude, specialties, profileImageUrl];
+  List<Object?> get props =>
+      [id, name, address, latitude, longitude, specialties, profileImageUrl];
 }

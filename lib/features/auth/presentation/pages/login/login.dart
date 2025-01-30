@@ -2,8 +2,6 @@ import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:tell_me_doctor/features/auth/presentation/riverpod/auth_providers.dart';
-import 'package:tell_me_doctor/features/auth/presentation/riverpod/auth_state.dart';
 
 class LoginPage extends ConsumerStatefulWidget {
   const LoginPage({super.key});
@@ -17,8 +15,10 @@ class _LoginPageState extends ConsumerState<LoginPage> {
   final TextEditingController _passwordController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
 
-  bool _isLoadingEmail = false; // Ajout d'une variable pour le bouton de connexion par email
-  bool _isLoadingGoogle = false; // Ajout d'une variable pour le bouton de connexion par Google
+  bool _isLoadingEmail =
+      false; // Ajout d'une variable pour le bouton de connexion par email
+  bool _isLoadingGoogle =
+      false; // Ajout d'une variable pour le bouton de connexion par Google
 
   @override
   void dispose() {
@@ -29,14 +29,6 @@ class _LoginPageState extends ConsumerState<LoginPage> {
 
   @override
   Widget build(BuildContext context) {
-    ref.listen<AuthState>(authNotifierProvider, (_, state) {
-      if (state.user != null) {
-        context.go('/home');
-      } else if (state.errorMessage != null) {
-        log("les logs d'authentification : ${state.errorMessage!}");
-        _showSnackBar(context, state.errorMessage!, Colors.red);
-      }
-    });
 
     return Scaffold(
       body: Stack(
@@ -59,7 +51,8 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                   key: _formKey,
                   child: SingleChildScrollView(
                     child: ConstrainedBox(
-                      constraints: BoxConstraints(minHeight: constraints.maxHeight),
+                      constraints:
+                          BoxConstraints(minHeight: constraints.maxHeight),
                       child: IntrinsicHeight(
                         child: Padding(
                           padding: const EdgeInsets.all(16.0),
@@ -69,7 +62,8 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                             children: [
                               const CircleAvatar(
                                 radius: 50,
-                                backgroundImage: AssetImage("assets/app_logo.png"),
+                                backgroundImage:
+                                    AssetImage("assets/app_logo.png"),
                               ),
                               const SizedBox(height: 20),
                               const Text(
@@ -122,18 +116,25 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                                 ),
                               ),
                               const SizedBox(height: 20),
-                              SizedBox(
+                            /*  SizedBox(
                                 width: double.infinity,
                                 child: ElevatedButton(
-                                  onPressed: _isLoadingEmail ? null : () {
-                                    if (_formKey.currentState!.validate()) {
+                                  onPressed: _isLoadingEmail
+                                      ? null
+                                      : () {
+                                    if (_formKey.currentState!
+                                        .validate()) {
                                       setState(() {
                                         _isLoadingEmail = true;
                                       });
-                                      ref.read(authNotifierProvider.notifier).signInWithEmailAndPassword(
+                                      ref
+                                          .read(authNotifierProvider
+                                          .notifier)
+                                          .signInWithEmailAndPassword(
                                         _emailController.text,
                                         _passwordController.text,
-                                      ).whenComplete(() {
+                                      )
+                                          .whenComplete(() {
                                         if (mounted) {
                                           setState(() {
                                             _isLoadingEmail = false;
@@ -144,8 +145,11 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                                   },
                                   style: ElevatedButton.styleFrom(
                                     backgroundColor: Colors.purple,
-                                    padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 15),
-                                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 30, vertical: 15),
+                                    shape: RoundedRectangleBorder(
+                                        borderRadius:
+                                        BorderRadius.circular(10)),
                                   ),
                                   child: _isLoadingEmail
                                       ? const CircularProgressIndicator(
@@ -160,35 +164,42 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                                     ),
                                   ),
                                 ),
-                              ),
+                              ),*/
                               const SizedBox(height: 20),
                               const Row(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
-                                  Text("Or Login with", style: TextStyle(fontWeight: FontWeight.w800)),
+                                  Text("Or Login with",
+                                      style: TextStyle(
+                                          fontWeight: FontWeight.w800)),
                                 ],
                               ),
                               const SizedBox(height: 20),
-                              SizedBox(
+                             /* SizedBox(
                                 width: double.infinity,
                                 child: ElevatedButton(
                                   onPressed: _isLoadingGoogle
                                       ? null
                                       : () {
-                                    setState(() {
-                                      _isLoadingGoogle = true;
-                                    });
-                                    ref.read(authNotifierProvider.notifier).signInWithGoogle().whenComplete(() {
-                                      if (mounted) {
-                                        setState(() {
-                                          _isLoadingGoogle = false;
-                                        });
-                                      }
-                                    });
-                                  },
+                                          setState(() {
+                                            _isLoadingGoogle = true;
+                                          });
+                                          ref
+                                              .read(
+                                                  authNotifierProvider.notifier)
+                                              .signInWithGoogle()
+                                              .whenComplete(() {
+                                            if (mounted) {
+                                              setState(() {
+                                                _isLoadingGoogle = false;
+                                              });
+                                            }
+                                          });
+                                        },
                                   style: ElevatedButton.styleFrom(
                                     backgroundColor: Colors.white,
-                                    padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 15),
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 30, vertical: 15),
                                     shape: RoundedRectangleBorder(
                                       borderRadius: BorderRadius.circular(10),
                                       side: const BorderSide(
@@ -201,24 +212,26 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                                   child: _isLoadingGoogle
                                       ? const CircularProgressIndicator()
                                       : Image.asset(
-                                    "assets/google-logo-carre-2015-09-400.png",
-                                    width: 25,
-                                    height: 25,
-                                  ),
+                                          "assets/google-logo-carre-2015-09-400.png",
+                                          width: 25,
+                                          height: 25,
+                                        ),
                                 ),
-                              ),
+                              ),*/
                               const SizedBox(height: 20),
                               Row(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
                                   const Text("Don't have an account?"),
                                   TextButton(
-                                    onPressed: _isLoadingEmail || _isLoadingGoogle
-                                        ? null
-                                        : () {
-                                      context.go('/register');
-                                    },
-                                    child: const Text("Register", style: TextStyle(color: Colors.purple)),
+                                    onPressed:
+                                        _isLoadingEmail || _isLoadingGoogle
+                                            ? null
+                                            : () {
+                                                context.go('/register');
+                                              },
+                                    child: const Text("Register",
+                                        style: TextStyle(color: Colors.purple)),
                                   ),
                                 ],
                               ),
@@ -254,7 +267,14 @@ class _LoginPageState extends ConsumerState<LoginPage> {
     );
   }
 
-  void _showSnackBar(BuildContext context, String message, Color backgroundColor) {
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message), backgroundColor: backgroundColor));
+  void _showSnackBar(
+      BuildContext context, String message, Color backgroundColor) {
+    ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(message), backgroundColor: backgroundColor));
   }
+
+
+
+
+
 }

@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart'; // Importez la bibliothèque flutter_svg
 import 'package:heroicons/heroicons.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:tell_me_doctor/features/auth/presentation/riverpod/auth_providers.dart';
 import 'package:tell_me_doctor/features/docai/presentation/pages/riverpod/chat_notifier.dart';
 import 'package:tell_me_doctor/features/docai/presentation/widgets/chat_message_widget.dart';
 
@@ -23,7 +22,7 @@ class _ChatPageState extends ConsumerState<DocAiPage> {
   Widget build(BuildContext context) {
     final messages = ref.watch(chatProvider);
     WidgetsBinding.instance.addPostFrameCallback((_) => _scrollToBottom());
-    final authState = ref.watch(authNotifierProvider);
+   // final authState = ref.watch(authNotifierProvider);
 
     return Scaffold(
       appBar: AppBar(
@@ -72,9 +71,10 @@ class _ChatPageState extends ConsumerState<DocAiPage> {
                       ),
                       child: TextField(
                         controller: _textController,
-                        decoration: InputDecoration(
+                        decoration: const InputDecoration(
                           hintText:
-                              "Alors ${authState.user?.firstName?.toLowerCase() ?? "User"} dites-moi tout... ",
+                            //  "Alors ${authState.user?.firstName?.toLowerCase() ?? "User"} dites-moi tout... ",
+                              "Alors dites-moi tout... ",
                           border: InputBorder.none,
                         ),
                         onSubmitted: (_) => _sendMessage(),

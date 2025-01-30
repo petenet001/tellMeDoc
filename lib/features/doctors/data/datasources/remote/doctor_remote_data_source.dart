@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:tell_me_doctor/features/doctors/data/models/doctor_category_model.dart';
 import 'package:tell_me_doctor/features/doctors/data/models/medical_provider_model.dart';
 import 'package:tell_me_doctor/features/doctors/data/models/health_center_model.dart';
-import 'package:tell_me_doctor/features/doctors/domain/entities/health_center.dart';
 
 class DoctorRemoteDataSource {
   final FirebaseFirestore firestore;

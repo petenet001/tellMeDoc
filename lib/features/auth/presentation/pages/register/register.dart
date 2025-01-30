@@ -2,8 +2,6 @@ import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:tell_me_doctor/features/auth/presentation/riverpod/auth_providers.dart';
-import 'package:tell_me_doctor/features/auth/presentation/riverpod/auth_state.dart';
 
 class RegisterPage extends ConsumerStatefulWidget {
   const RegisterPage({super.key});
@@ -28,17 +26,6 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
 
   @override
   Widget build(BuildContext context) {
-    ref.listen<AuthState>(authNotifierProvider, (_, state) {
-      if (state.user != null) {
-        context.go('/home');
-      } else if (state.errorMessage != null) {
-        log("les logs d'enregistrement : ${state.errorMessage!}");
-        _showSnackBar(context, state.errorMessage!, Colors.red);
-      }
-    });
-
-    final isLoading = ref.watch(authNotifierProvider).isLoading;
-
     return Scaffold(
       body: Stack(
         children: [
@@ -125,7 +112,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                                 },
                               ),
                               const SizedBox(height: 20),
-                              SizedBox(
+                              /*SizedBox(
                                 width: double.infinity,
                                 child: ElevatedButton(
                                   onPressed: isLoading ? null : () {
@@ -154,9 +141,9 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                                     ),
                                   ),
                                 ),
-                              ),
+                              ),*/
                               const SizedBox(height: 20),
-                              Row(
+                             /* Row(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
                                   const Text("Already have an account?"),
@@ -164,12 +151,12 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                                     onPressed: isLoading
                                         ? null
                                         : () {
-                                      context.go('/login');
+                                      context.go('/auth');
                                     },
                                     child: const Text("Login", style: TextStyle(color: Colors.purple)),
                                   ),
                                 ],
-                              ),
+                              ),*/
                             ],
                           ),
                         ),

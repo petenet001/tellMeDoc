@@ -3,8 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:tell_me_doctor/features/auth/domain/entities/user.dart';
-import 'package:tell_me_doctor/features/auth/presentation/riverpod/auth_providers.dart';
-import 'package:tell_me_doctor/features/auth/presentation/riverpod/auth_state.dart';
 
 class ProfilePage extends ConsumerStatefulWidget {
   const ProfilePage({super.key});
@@ -35,14 +33,16 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
 
   @override
   Widget build(BuildContext context) {
-    final authState = ref.watch(authNotifierProvider);
-
+  /*  final authState = ref.watch(authNotifierProvider);
+*/
     return Scaffold(
       appBar: AppBar(title: const Text('Profile')),
-      body: _buildBody(authState),
+      //body: _buildBody(authState),
+      body: Placeholder(),
     );
   }
 
+/*
   Widget _buildBody(AuthState state) {
     if (state.isLoading) {
       return const Center(child: CircularProgressIndicator());
@@ -60,6 +60,8 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
       return const Center(child: Text('Please log in'));
     }
   }
+*/
+/*
 
   Widget _buildProfileForm(User user) {
     return Padding(
@@ -114,6 +116,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
       ),
     );
   }
+*/
 
   Widget _buildTextField({required TextEditingController controller, required String labelText, bool enabled = true}) {
     return TextField(
@@ -136,7 +139,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
     }
   }
 
-  Future<void> _pickImage() async {
+ /* Future<void> _pickImage() async {
     final pickedFile = await _imagePicker.pickImage(source: ImageSource.gallery);
 
     if (pickedFile != null) {
@@ -146,9 +149,9 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
       });
       ref.read(authNotifierProvider.notifier).updateProfilePicture(photoUrl);
     }
-  }
+  }*/
 
-  void _updateProfile() {
+  /*void _updateProfile() {
     final updatedUser = User(
       id: ref.read(authNotifierProvider).user!.id,
       name: _nameController.text,
@@ -159,7 +162,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
       photoUrl: _photoUrl,
     );
     ref.read(authNotifierProvider.notifier).updateUserProfile(updatedUser);
-  }
+  }*/
 
   Future<bool?> _showSignOutConfirmationDialog(BuildContext context) {
     return showDialog<bool>(
