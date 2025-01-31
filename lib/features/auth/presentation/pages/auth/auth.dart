@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
-import 'package:tell_me_doctor/presentation/pages/main_view/main_view.dart';
+import 'package:tell_me_doctor/presentation/main_view/main_view.dart';
 
 class AuthPage extends ConsumerWidget {
   final Widget? child;
@@ -11,7 +10,7 @@ class AuthPage extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
 
-    return const MainView();
+    return  MainView();
 
 /*    if (authState.isLoading) {
       return const Scaffold(

@@ -14,7 +14,7 @@ class DoctorProfile extends StatelessWidget {
         height: 180,
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(15),
-          color: AppColors.kPrimaryColor,
+          color: AppColors.kSecondareyColor,
         ),
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 25),

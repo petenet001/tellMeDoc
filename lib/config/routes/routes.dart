@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:tell_me_doctor/features/docai/presentation/pages/doctor_ai/doc_ai.dart';
 import 'package:tell_me_doctor/presentation/onboarding/mobile/on_boarding.dart';
-import 'package:tell_me_doctor/presentation/pages/main_view/main_view.dart';
+import 'package:tell_me_doctor/presentation/main_view/main_view.dart';
 
 import '../../features/auth/presentation/pages/auth/auth.dart';
 import '../../features/auth/presentation/pages/profile/profile.dart';
@@ -37,7 +37,7 @@ final GoRouter router = GoRouter(
       pageBuilder: (BuildContext context, GoRouterState state) {
         return CustomTransitionPage(
           key: state.pageKey,
-          child: const MainView(),
+          child:  MainView(),
           transitionsBuilder: (context, animation, secondaryAnimation, child) {
             return FadeTransition(
               opacity:
@@ -80,7 +80,7 @@ final GoRouter router = GoRouter(
         );
       },
     ),*/
-  /*  GoRoute(
+    /*  GoRoute(
       path: '/auth',
       pageBuilder: (BuildContext context, GoRouterState state) {
         return CustomTransitionPage(
@@ -128,7 +128,7 @@ final GoRouter router = GoRouter(
         );
       },
     ),
-   /* GoRoute(
+    /* GoRoute(
       path: '/doc_profile/:id',
       pageBuilder: (BuildContext context, GoRouterState state) {
         final doctor = state.extra as MedicalProvider;
@@ -145,7 +145,7 @@ final GoRouter router = GoRouter(
         );
       },
     ),*/
-   /* GoRoute(
+    /* GoRoute(
       path: '/doctors/:category',
       pageBuilder: (BuildContext context, GoRouterState state) {
         final category = state.pathParameters['category']!;
@@ -162,7 +162,7 @@ final GoRouter router = GoRouter(
         );
       },
     ),*/
-  /*  GoRoute(
+    /*  GoRoute(
       path: '/all-categories',
       pageBuilder: (BuildContext context, GoRouterState state) {
         return CustomTransitionPage(
@@ -177,7 +177,7 @@ final GoRouter router = GoRouter(
         );
       },
     ),*/
-   /* GoRoute(
+    /* GoRoute(
       path: '/all-doctors',
       pageBuilder: (BuildContext context, GoRouterState state) {
         final city = state.pathParameters['city'] ?? '';

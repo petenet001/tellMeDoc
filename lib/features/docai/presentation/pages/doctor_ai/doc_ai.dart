@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart'; // Importez la bibliothèque flutter_svg
+import 'package:go_router/go_router.dart';
 import 'package:heroicons/heroicons.dart';
+import 'package:iconsax/iconsax.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:tell_me_doctor/features/docai/presentation/pages/riverpod/chat_notifier.dart';
 import 'package:tell_me_doctor/features/docai/presentation/widgets/chat_message_widget.dart';
@@ -25,8 +27,17 @@ class _ChatPageState extends ConsumerState<DocAiPage> {
    // final authState = ref.watch(authNotifierProvider);
 
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: AppBar(
-        title: const Text('Assistant Médical'),
+        title: const Text('Assistant Médical',style: const TextStyle(fontWeight: FontWeight.w600,fontSize: 26)),
+        leading: BackButton(
+          onPressed: () {
+            context.go('/main-page');
+          },
+        ),
+        actions: [
+          IconButton(onPressed: (){}, icon: const Icon(Icons.history))
+        ],
       ),
       body: SafeArea(
         child: Column(

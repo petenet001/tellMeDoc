@@ -1,43 +1,40 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+import 'package:heroicons/heroicons.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:tell_me_doctor/config/theme/colors.dart';
-import 'package:tell_me_doctor/features/home/presentation/pages/home/home.dart';
+import 'package:tell_me_doctor/features/account/presentation/pages/profile/profile_view.dart';
+import 'package:tell_me_doctor/features/home/presentation/pages/home/home_view.dart';
+import 'package:tell_me_doctor/features/messages/presentation/pages/messages/messages_view.dart';
 import 'package:tell_me_doctor/features/schedule/presentation/pages/schedule/schedule_view.dart';
+import 'package:tell_me_doctor/presentation/riverpod/bottom_nav_provider.dart';
 
-class MainView extends ConsumerStatefulWidget {
-  const MainView({super.key});
-  @override
-  MainViewState createState() => MainViewState();
-}
 
-class MainViewState extends ConsumerState<MainView> {
 
-  @override
-  void initState() {
-    super.initState();
-    //ref.read(authState);
-   // ref.read(authNotifierProvider);
-  }
+class MainView extends ConsumerWidget {
 
-  int selectedIndex = 0;
+  MainView({super.key});
+
+  final int selectedIndex = 0;
   final List<Widget> pages = [
     const HomeView(),
     const ScheduleView(),
-    const Scaffold(),
-    const Scaffold(),
+    const MessagesView(),
+    const ProfileView()
   ];
 
   final List<String> listPages = [
     "Accueil",
     "Rendez-vous",
     "Messages",
-    "Profil",
+    "Profile",
   ];
 
+
   @override
-  Widget build(BuildContext context) {
-    //final authState = ref.watch(authNotifierProvider);
+  Widget build(BuildContext context,WidgetRef ref) {
+    final selectedIndex = ref.watch(bottomNavNotifierProvider);
     return Scaffold(
       appBar: AppBar(
         elevation: 0,
@@ -80,53 +77,50 @@ class MainViewState extends ConsumerState<MainView> {
         ],
       ),
       backgroundColor: Colors.white,
-      body: Center(
-        child: pages[selectedIndex],
-      ),
+      body: pages[selectedIndex],
       bottomNavigationBar: BottomNavigationBar(
         //elevation: 0,
-        elevation: 50,
+        type: BottomNavigationBarType.fixed,
+        elevation: 80,
         backgroundColor: Colors.white,
         unselectedItemColor: Colors.black26,
         selectedItemColor: AppColors.kPrimaryColor,
         iconSize: 30,
-        type: BottomNavigationBarType.fixed,
         currentIndex: selectedIndex,
         onTap: (value) {
-          setState(() {
-            selectedIndex = value;
-
-            debugPrint("page ici $selectedIndex");
-          });
+          ref.read(bottomNavNotifierProvider.notifier).setIndex(value);
+          debugPrint("page ici $value");
         },
         items: const [
           BottomNavigationBarItem(
             icon: Icon(
-              Iconsax.home5,
+              Iconsax.home_2,
             ),
-            label: "",
+            label: "Accueil",
           ),
           BottomNavigationBarItem(
             icon: Icon(
               Iconsax.calendar_1,
             ),
-            label: "",
+            label: "Rendez-vous",
           ),
           BottomNavigationBarItem(
             icon: Icon(
               Iconsax.message,
             ),
-            label: "",
+            label: "Messages",
           ),
           BottomNavigationBarItem(
             icon: Icon(
               Icons.person_outline,
             ),
-            label: "",
+            label: "Profile",
           ),
         ],
       ),
-     // body: pages[selectedIndex]
+      floatingActionButton: FloatingActionButton(onPressed: (){
+        context.go('/chat');
+      },child:  const HeroIcon(HeroIcons.sparkles)),
     );
   }
 }
